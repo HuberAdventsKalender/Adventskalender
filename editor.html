@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Adventskalender-Editor</title>
+<style>
+body{font-family:Arial;padding:20px;}
+input,textarea{width:100%;margin-bottom:10px;}
+.doorBox{border:1px solid #ccc;padding:10px;margin-bottom:15px;}
+</style>
+<script>
+let doors=[];
+async function load(){
+  const res=await fetch("aufgaben.json");
+  doors=await res.json();
+  const box=document.getElementById("editor");
+  doors.forEach((d,i)=>{
+    const div=document.createElement("div");
+    div.className="doorBox";
+    div.innerHTML=`
+      <h3>Türchen ${i+1}</h3>
+      <label>Text:<textarea onchange="update(${i},'text',this.value)">${d.text}</textarea></label>
+      <label>Media:<input value="${d.media}" onchange="update(${i},'media',this.value)"></label>
+      <label>Passwort:<input value="${d.password}" onchange="update(${i},'password',this.value)"></label>
+      <label>Datum:<input type="number" value="${d.date}" onchange="update(${i},'date',this.value)"></label>
+    `;
+    box.appendChild(div);
+  });
+}
+function update(i,key,val){doors[i][key]=val;}
+function download(){
+  const data=JSON.stringify(doors,null,2);
+  const blob=new Blob([data],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download="aufgaben.json";a.click();
+}
+window.onload=load;
+</script>
+</head>
+<body>
+<h1>Adventskalender-Editor</h1>
+<div id="editor"></div>
+<button onclick="download()">Neue JSON herunterladen</button>
+</body>
+</html>

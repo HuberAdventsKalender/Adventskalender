@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Familien-Adventskalender</title>
+<script>
+async function loadDoors() {
+  const res = await fetch("aufgaben.json");
+  const doors = await res.json();
+  const calendar = document.getElementById("calendar");
+  const contentBox = document.getElementById("contentBox");
+  const today = new Date().getDate();
+  doors.forEach((door,i)=>{
+    const d=document.createElement("div");
+    d.className="door";
+    d.textContent=i+1;
+    if(door.date>today)d.classList.add("locked");
+    d.onclick=()=>openDoor(i,door,d);
+    calendar.appendChild(d);
+  });
+}
+function openDoor(i,door,el){
+  const contentBox=document.getElementById("contentBox");
+  const today=new Date().getDate();
+  if(door.date>today){contentBox.innerHTML="Zu früh!";return;}
+  if(door.password){
+    const pw=prompt("Passwort:");
+    if(pw!==door.password){alert("Falsch!");return;}
+  }
+  let media="";
+  if(door.media){
+    if(door.media.endsWith(".jpg")||door.media.endsWith(".png"))
+      media=`<img src="${door.media}" />`;
+    else if(door.media.includes("youtube"))
+      media=`<iframe width="100%" height="315" src="${door.media}"></iframe>`;
+    else if(door.media.endsWith(".mp4"))
+      media=`<video controls src="${door.media}"></video>`;
+  }
+  contentBox.innerHTML=`<h2>Türchen ${i+1}</h2><p>${door.text}</p>${media}`;
+}
+window.onload=loadDoors;
+</script>
+<style>
+body{font-family:Arial;padding:20px;text-align:center;}
+.calendar{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;max-width:900px;margin:auto;}
+.door{background:#d63031;color:white;padding:25px;border-radius:12px;font-size:22px;font-weight:bold;cursor:pointer;}
+.locked{background:#636e72;}
+</style>
+</head>
+<body>
+<h1>🎄 Adventskalender</h1>
+<div id="calendar" class="calendar"></div>
+<div id="contentBox" style="margin-top:20px;"></div>
+</body>
+</html>
